@@ -21,15 +21,15 @@
 
 
 ## Project Instruction 
-- ‼ Note: This project involves the use of **paid** AWS services. Please be aware that charges will apply if you use them!
+- ‼ Note: This project involves the use of **paid** AWS services. Please be aware that charges will apply.
 - Before starting, you need an AWS account. (Search: AWS Management console and register one with free)
 
 ### Step 1: Setting up EC2 for local running app with cloud service
 
 #### Launch T2 large EC2 instance(Ubuntu)
-- 1. For this project, we using **T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server, make sure you choose T2 Large instance!
-- 2. For operating system → Ubuntu
-- 3. 
+1. For this project, we using **T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server, make sure you choose T2 Large instance!
+2. For operating system → Ubuntu
+3. 
 
 
 
