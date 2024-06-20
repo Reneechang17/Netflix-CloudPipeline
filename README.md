@@ -27,17 +27,19 @@
 ### Step 1: Setting up EC2 for local running app with cloud service
 
 #### Launch T2 large EC2 instance(Ubuntu)
-1. For this project, we using **T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server, make sure you choose T2 Large instance
-2. Operating system: Ubuntu
-3. Create key pair(for mac using .ppk and for Linux using .pem)
-4. Network: using default VPC and subnet
-5. Firewall(Security Group): allows SSH, HTTP and HTTPs traffic because later we using Jenkins to connect with DockerHub, and DockerHub talks on HTTPs
-6. Storage: change to **25GB**
-7. Create instance
-- Note: Before running the instance, we have to create the **ElasticIP** for later break or etc, which make sure that our IP will not be changed
-8. Network & Security: allocate ElasticIP and make it *associate* with current instance and named it
-9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
-----Inside server----
+1. EC2 instance Setting:
+  1. For this project, we using **T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server, make sure you choose T2 Large instance
+  2. Operating system: Ubuntu
+  3. Create key pair(for mac using .ppk and for Linux using .pem)
+  4. Network: using default VPC and subnet
+  5. Firewall(Security Group): allows SSH, HTTP and HTTPs traffic because later we using Jenkins to connect with DockerHub, and DockerHub talks on HTTPs
+  6. Storage: change to **25GB**
+  7. Create instance
+  - Note: Before running the instance, we have to create the **ElasticIP** for later break or etc, which make sure that our IP will not be changed
+  8. Network & Security: allocate ElasticIP and make it *associate* with current instance and named it
+  9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
+
+2. 
 
 
 
