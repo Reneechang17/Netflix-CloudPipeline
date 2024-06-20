@@ -18,6 +18,8 @@
 | `Jenkins`          | `:8080` |
 | `SonarQube`        | `:9000` |
 | `Prometheus`       | `:9090` |
+| `Node Exporter`    | `:9100` |
+| `Grafana`          | `:3000` |
 
 
 ## Project Instruction 
@@ -375,20 +377,123 @@ ExecStart=/usr/local/bin/prometheus \
 [Install]
 WantedBy=multi-user.target
 ```  
-
-
+5. Then we can enable and start the Prometheus:
+    ```
+    sudo systemctl enable prometheus
+    sudo systemctl start prometheus
+    ```
+6. Verify Status: `sudo systemctl status prometheus`
+7. Finally, you can use *PublicIP:9000* to access the web browser. Make sure setting up the port 9090 for Prometheus in Security group
 
 #### Install Node Exporter
-
-
-
+1. Create a user named node_exporter and install node exporter from official github repo
+    
+    ```
+    sudo useradd --system --no-create-home --shell /bin/false node_exporter
+    wget https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
+    ```
+    
+2. Unzip the folder and move necessary file to particular folder and clean up
+    
+    ```
+    tar -xvf node_exporter-1.6.1.linux-amd64.tar.gz
+    sudo mv node_exporter-1.6.1.linux-amd64/node_exporter /usr/local/bin/
+    rm -rf node_exporter*
+    ```
+    
+    - After doing this, we can see under /usr/local/bin/, there are **node_exporter** prometheus promtool
+3. Create Node Exporter systemd unit config: `sudo nano /etc/systemd/system/node_exporter.service`
+    - this command will open nano tab, and we need to paste below service configuration to the tab: 
+    ```
+    [Unit]
+    Description=Node Exporter
+    Wants=network-online.target
+    After=network-online.target
+    
+    StartLimitIntervalSec=500
+    StartLimitBurst=5
+    
+    [Service]
+    User=node_exporter
+    Group=node_exporter
+    Type=simple
+    Restart=on-failure
+    RestartSec=5s
+    ExecStart=/usr/local/bin/node_exporter --collector.logind
+    
+    [Install]
+    WantedBy=multi-user.target
+    ```
+        
+4. Enable and start Node Exporter:
+    
+    ```
+    sudo systemctl enable node_exporter
+    sudo systemctl start node_exporter
+    ```
+    
+5. Verify the status: `sudo systemctl status node_exporter`
+6. Finally, you can access Node Exporter metrics in Prometheus
 
 #### Integrate Node Exporter with Jenkins (modify the prometheus.yml file)
-
-
+1. First cd to /etc/prometheus/
+2. Whenever you want to monitor something, you should edit it → use `cat prometheus.yml` to see the job now exist and going to add node exporter and Jenkins
+  - How to edit?? command: `sudo nano prometheus.yml`
+    - and use the below template to add(Make sure your Jenkins IP and port are correct:
+    
+    ```
+    global:
+      scrape_interval: 15s
+    
+    scrape_configs:
+      - job_name: 'node_exporter'static_configs:
+          - targets: ['localhost:9100']
+    ```
+    
+3. Check the validity: `promtool check config /etc/prometheus/prometheus.yml`
+4. Reload: `curl -X POST http://localhost:9090/-/reload`
+5. And you can access Prometheus targets and see node_exporter: *PublicIP:9090/targets*
+    - Make sure your port 9100 is open
 
 #### Install Grafana and set it work with Prometheus
+1. Install all necessary dependencies for Grafana and set port 3000 port with Grafana in security group
 
+    ```
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https software-properties-common
+    ```
+    
+2. Add GPG key for Grafana, and it will output “OK”
+    
+    ```
+    wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+    ```
+    
+3. Add Grafana repo
+    
+    ```
+    echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+    ```
+    
+4. Update and install Grafana
+    
+    ```
+    sudo apt-get update
+    sudo apt-get -y install grafana
+    ```
+    
+5. Enable and start Grafana, also you can check the status
+`sudo systemctl enable grafana-server`
+`sudo systemctl start grafana-server` 
+`sudo systemctl status grafana-server`
+6. Then you can open the PublicIP:3000 to see Grafana with browser. Default username and password is “admin”
+7. Add Prometheus data source in Grafana:
+    
+    Add data source option → choose “Prometheus” →Put your Prometheus server URL in box( In my case is PublicIP: 9090) → Scroll down and click Save and Test
+    
+8. Back to Grafana home page and import a dashboard:
+    
+    click “+” sign → import a dashboard → Enter your template ID([https://grafana.com/grafana/dashboards/1860-node-exporter-full /](https://grafana.com/grafana/dashboards/1860-node-exporter-full/) or search for node exporter grafana dashboard on website then you can get it) → Select “Prometheus” as data source → import and you will see a nice dashboard show us CPU, RAM and more info
 
 
 #### Integrate Jenkins in Prometheus and monitor Jenkins using Grafana
