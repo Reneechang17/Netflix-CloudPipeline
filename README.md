@@ -37,6 +37,7 @@
 - Note: Before running the instance, we have to create the **ElasticIP** for later break or etc, which make sure that our IP will not be changed
 8. Network & Security: allocate ElasticIP and make it *associate* with current instance and named it
 9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
+----Inside server----
 
 
 
