@@ -41,23 +41,29 @@
     8. Network & Security: allocate ElasticIP and make it *associate* with current instance and named it
     9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
 #### Update and Clone the github repo: 
+
    ```
    sudo apt update -y
    git clone https://github.com/Reneechang17/Netflix-CloudPipeline
    ```
+
 #### Install the Docker and running the app using a container
 1. Set up Docker on the EC2 instance
+
     ```
     sudo apt-get install docker.io -y
     sudo usermod -aG docker [your system user name]
     newgrp docker
     sudo chmod 777 /var/run/docker.sock
     ```
+
 2. Build and run application using Docker containers
+
     ```
     docker build -t netflix .
     docker run -d --name netflix -p 8081:80 netflix:latest
     ```
+
 3. You will get error because we need API Key
 #### Get API Key from TMBD
 1. search TMDB(The movie Database), then Login or create an account
@@ -67,16 +73,19 @@
 #### Recreate your Docker image with your TMDB API key
 - `docker build --build-arg TMDB_V3_API_KEY=<your-api-key> -t netflix .`
  - You might need delete previous one:
+
     ```
     docker stop <containerid>
     docker rmi -f netflix
     ```
+
 #### Therefore, you can use ***PublicIP:8081*** port and access the Application on browser
 
 ### Step 2: Integrated SonarQube & Trivy for Security
 #### Install SonarQube and Trivy on server
 -  For SonarQube: `docker run -d --name sonar -p 9000:9000 sonarqube:lts-community` (using port ***PublicIP:9000*** to access it, default username and pwd is admin)
 -  For Trivy: 
+
    ```
    sudo apt-get install wget apt-transport-https gnupg lsb-release
    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
@@ -84,6 +93,7 @@
    sudo apt-get update
    sudo apt-get install trivy
    ```
+
 -  You can type `trivy` to see all the options we can use
 -  To scan correct one: `trivy fs .`
 -  To scan image using Trivy: `trivy image <IMAGE ID>`
@@ -93,6 +103,7 @@
 #### Introduced Jenkins and install necessary plugins in Jenkins
 - Note: Before using Jenkins, we should install **Java** first
 1. Install Java (if not exist on your server) and Jenkins on EC2 instance to automate deployment
+
    ```
    # Install Java first
    sudo apt update
@@ -113,6 +124,7 @@
    sudo systemctl start jenkins
    sudo systemctl enable jenkins
    ```
+
 2. Command: `sudo service jenkins status` and open *PublicIP:8080* to access Jenkins
     - After accessing to the signin page, use **path** to get the password. Type `sudo cat [path]` , then get the password → continue
 3. Getting Started with Jenkins: choose install suggested plugins
@@ -137,6 +149,7 @@
 4. Setting up in Tools: Manage Jenkins → Tools → Set up SonarQube Scanner → Apply
     - **So our pipeline is ready to deploy an application now**
 5. Click "New Item" and select Pipeline and paste below pipeline script
+
 ```groovy
 
 pipeline{
@@ -215,6 +228,7 @@ pipeline{
 }
 
 ```
+
 6. Add Docker and Dependency-Check Plugins and tools in Jenkins:
     1. Install OWasp(dependency-check) and Docker: Jenkins dashboard → Manage Jenkins → Manage Plugins → Search and Install
         - OWASP Dependency-Check
@@ -231,6 +245,7 @@ pipeline{
     - Name: Docker
     - Choose "download from [docker.com](http://docker.com) " with latest version
 8. Add a pipeline which will be going to scan images through Trivy, check dependency through OWasp and also build and push the image to our DockerHub using the commands
+
 ```groovy
 
 pipeline{
@@ -309,7 +324,9 @@ pipeline{
 }
 
 ```
+
 - Note: If your pipeline failure with "Docker LogIn Failed", you can command below and try to solve(make sure your credentials and port no problems):
+
 ```
 sudo su 
 sudo usermod -aG docker jenkins
@@ -336,7 +353,8 @@ sudo systemctl restart jenkins
     wget https://github.com/prometheus/prometheus/releases/download/v2.47.1/prometheus-2.47.1.linux-amd64.tar.gz
     ```
     
-2. Unzip the folder and go inside folder, then create a dictionary named as data and prometheus, move all necessary files inside local bin. 
+2. Unzip the folder and go inside folder, then create a dictionary named as data and prometheus, move all necessary files inside local bin
+
     ```
     tar -xvf prometheus-2.47.1.linux-amd64.tar.gz
     cd prometheus-2.47.1.linux-amd64/
@@ -345,12 +363,14 @@ sudo systemctl restart jenkins
     sudo mv consoles/ console_libraries/ /etc/prometheus/
     sudo mv prometheus.yml /etc/prometheus/prometheus.yml
     ```
+
     - After doing this, you can see under */usr/local/bin/*, there are prometheus promtool, and under */etc/prometheus/*, there are consoles/ console_libraries prometheus.yml
 3. Change the permission for above files
     - The initial owner is Ubuntu, we need to change it to the Prometheus user we created
     `sudo chown -R prometheus:prometheus /etc/prometheus/ /data/` 
 4. Create Prometheus systemd unit config: `sudo nano /etc/systemd/system/prometheus.service`
     - this command will open nano tab, and we need to paste below(service configuration) to the tab:
+
 ```
 [Unit]
 Description=Prometheus
@@ -377,11 +397,14 @@ ExecStart=/usr/local/bin/prometheus \
 [Install]
 WantedBy=multi-user.target
 ```  
-5. Then we can enable and start the Prometheus:
+
+5. Then we can enable and start the Prometheus
+
     ```
     sudo systemctl enable prometheus
     sudo systemctl start prometheus
     ```
+
 6. Verify Status: `sudo systemctl status prometheus`
 7. Finally, you can use *PublicIP:9000* to access the web browser. Make sure setting up the port 9090 for Prometheus in Security group
 
@@ -404,6 +427,7 @@ WantedBy=multi-user.target
     - After doing this, we can see under /usr/local/bin/, there are **node_exporter** prometheus promtool
 3. Create Node Exporter systemd unit config: `sudo nano /etc/systemd/system/node_exporter.service`
     - this command will open nano tab, and we need to paste below service configuration to the tab: 
+
     ```
     [Unit]
     Description=Node Exporter
@@ -483,21 +507,41 @@ WantedBy=multi-user.target
     ```
     
 5. Enable and start Grafana, also you can check the status
-`sudo systemctl enable grafana-server`
-`sudo systemctl start grafana-server` 
-`sudo systemctl status grafana-server`
-6. Then you can open the PublicIP:3000 to see Grafana with browser. Default username and password is “admin”
+
+    ```
+    sudo systemctl enable grafana-server`
+    sudo systemctl start grafana-server` 
+    sudo systemctl status grafana-server`
+    ```
+
+6. Then you can open the *PublicIP:3000* to see Grafana with browser. Default username and password is "admin"
 7. Add Prometheus data source in Grafana:
-    
-    Add data source option → choose “Prometheus” →Put your Prometheus server URL in box( In my case is PublicIP: 9090) → Scroll down and click Save and Test
+    - Add data source option → choose "Prometheus" →Put your Prometheus server URL in box(In my case is PublicIP: 9090) → Scroll down and click Save and Test
     
 8. Back to Grafana home page and import a dashboard:
+    - Click "+" sign → import a dashboard → Enter your template ID(search for "node exporter grafana dashboard" on website then you can get it) → Select "Prometheus" as data source → import and you will see a nice dashboard show us CPU, RAM and more info..
+
+#### Integrate Jenkins with Prometheus and monitor Jenkins using Grafana
+1. Integrate Jenkins with Prometheus
+    1. Back to Jenkins dashboard → Manage Jenkins → Plugins → Available plugins → search for “Prometheus metrics” → install
+        - Note: If you restart it you should make sure your password is ready since you will need to log in with your password:
+          `sudo cat /var/lib/jenkins/secrets/initialAdminPassword` 
     
-    click “+” sign → import a dashboard → Enter your template ID([https://grafana.com/grafana/dashboards/1860-node-exporter-full /](https://grafana.com/grafana/dashboards/1860-node-exporter-full/) or search for node exporter grafana dashboard on website then you can get it) → Select “Prometheus” as data source → import and you will see a nice dashboard show us CPU, RAM and more info
+    2. Sign in with Jenkins → Manage Jenkins → System(might wait some time) → check “Prometheus”(nothing to do actually) → Save 
+    3. Add Jenkins into your prometheus.yml(use nano)
+    
+    ```
+     scrape_configs:
+    	 - job_name: 'jenkins'
+    		 metrics_path: '/prometheus'
+    		 static_configs:
+    	     - targets: ['<your-jenkins-ip>:<your-jenkins-port>']
+    ```
+    
+    4. Reload: `curl -X POST http://localhost:9090/-/reload` 
+    5. And you can access Prometheus targets and see Jenkins using *PublicIP:9090/targets*
 
-
-#### Integrate Jenkins in Prometheus and monitor Jenkins using Grafana
-
+2. Monitor Jenkins using Grafana
 
 
 ### Step 5: Email Notification
