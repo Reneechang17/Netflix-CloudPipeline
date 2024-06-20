@@ -87,8 +87,41 @@
 -  To scan image using Trivy: `trivy image <IMAGE ID>`
     - Once scanning by Trivy, we will get the report of what is the problem
 
-
 ### Step 3: Using Jenkins for CI/CD build and deploy
+#### Introduced Jenkins and install necessary plugins in Jenkins
+- Note: Before using Jenkins, we should install **Java** first
+1. Install Java (if not exist on your server) and Jenkins on EC2 instance to automate deployment
+   ```
+   # Install Java first
+   sudo apt update
+   sudo apt install fontconfig openjdk-17-jre
+   java -version
+   openjdk version "17.0.8" 2023-07-18
+   OpenJDK Runtime Environment (build 17.0.8+7-Debian-1deb12u1)
+   OpenJDK 64-Bit Server VM (build 17.0.8+7-Debian-1deb12u1, mixed mode, sharing)
+
+   # Then install Jenkins
+   sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
+   https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+   echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+   https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+   /etc/apt/sources.list.d/jenkins.list > /dev/null
+   sudo apt-get update
+   sudo apt-get install jenkins
+   sudo systemctl start jenkins
+   sudo systemctl enable jenkins
+   ```
+2. Command: `sudo service jenkins status` and open *PublicIP:8080* to access Jenkins
+    - After accessing to the signin page, use **path** to get the password. Type `sudo cat [path]` , then get the password → continue
+3. Getting Started with Jenkins: choose install suggested plugins
+    - Then we need to install some necessary plugins: Manage Jenkins → Plugins → Available Plugins:
+        - Eclipse Temurin Installer 
+        - SonarQube Scanner
+        - NodeJs Plugin
+        - Email Extension Plugin
+
+
+#### Setting up SonarQube
 
 
 ### Step 4: Adding Prometheus & Grafana for monitoring(EC2 and Jenkins and K8s)
