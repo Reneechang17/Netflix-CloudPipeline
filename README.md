@@ -40,7 +40,18 @@
     9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
 
 2. Inside server:
-    1. Update all packages using command: 、sudo apt update -y、
+    1. Update all packages using command: `sudo apt update -y`
+    - why we need update??? for secure, stable and compatible, make sure that all things are up to date
+    2. Clone the github repo: git clone https://github.com/Reneechang17/Netflix-CloudPipeline
+    3. Install the Docker and running the app using a container
+        1. Set up Docker on the EC2 instance
+        ```
+        sudo apt-get install docker.io -y
+        sudo usermod -aG docker [your system user name]
+        newgrp docker
+        sudo chmod 777 /var/run/docker.sock
+        ```
+
 
 
 
