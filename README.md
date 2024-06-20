@@ -28,7 +28,7 @@
 
 #### Launch T2 large EC2 instance(Ubuntu)
 1. EC2 instance Setting:
-  1. For this project, we using **T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server, make sure you choose T2 Large instance
+  * For this project, we using **T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server, make sure you choose T2 Large instance
   2. Operating system: Ubuntu
   3. Create key pair(for mac using .ppk and for Linux using .pem)
   4. Network: using default VPC and subnet
