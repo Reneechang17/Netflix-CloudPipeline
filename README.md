@@ -39,7 +39,8 @@
     8. Network & Security: allocate ElasticIP and make it *associate* with current instance and named it
     9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
 
-2. 
+2. Inside server:
+    1. Update all packages using command: 、sudo apt update -y、
 
 
 
