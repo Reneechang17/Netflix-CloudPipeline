@@ -119,10 +119,66 @@
         - SonarQube Scanner
         - NodeJs Plugin
         - Email Extension Plugin
-
-
+4. Configure Java and NodeJs in Tool Configuration
+    - Manage Jenkins → Tools → Install **JDK(17) and NodeJs(16)** → Apply and Save
 #### Setting up SonarQube
-
+1. Back to SonarQube dashboard(PublicIP:9000), then click Administration → Security → Users → Tokens for create token and copy token
+2. In Jenkins → Credentials → system → global credentials → new credential
+    - Kind: Secret text
+    - Scope: Global
+    - Secret: paste your token
+    - ID/ description: sonar-token
+3. Manage Jenkins → System → Setting up SonarQube servers → Apply and Save
+    - Name: sonar-server
+    - Server URL: PublicIP:9000
+    - choose sonar-token
+4. Setting up in Tools: Manage Jenkins → Tools → Set up SonarQube Scanner → Apply
+    - **So our pipeline is ready to deploy an application now**
+5. Click "New Item" and select Pipeline and paste below pipeline script
+   ```
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk17'
+        nodejs 'node16'
+    }
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+    stages {
+        stage('clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Reneechang17/Netflix-CloudPipeline'
+            }
+        }
+        stage("Sonarqube Analysis") {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Netflix \
+                    -Dsonar.projectKey=Netflix'''
+                }
+            }
+        }
+        stage("quality gate") {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                }
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+    }
+}
+   ```
 
 ### Step 4: Adding Prometheus & Grafana for monitoring(EC2 and Jenkins and K8s)
 
