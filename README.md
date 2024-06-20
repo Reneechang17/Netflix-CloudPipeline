@@ -28,11 +28,11 @@
 
 #### Launch T2 large EC2 instance(Ubuntu)
 1. EC2 instance Setting:
-    1. For this project, we using **T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server, make sure you choose T2 Large instance
+    1. Choose T2 large**(which is not in free tier). Because we are going to do a lot of stuff like different plugins so we need a big server
     2. Operating system: Ubuntu
     3. Create key pair(for mac using .ppk and for Linux using .pem)
     4. Network: using default VPC and subnet
-    5. Firewall(Security Group): allows SSH, HTTP and HTTPs traffic because later we using Jenkins to connect with DockerHub, and DockerHub talks on HTTPs
+    5. Firewall: allows SSH, HTTP and HTTPs traffic
     6. Storage: change to **25GB**
     7. Create instance
     - Note: Before running the instance, we have to create the **ElasticIP** for later break or etc, which make sure that our IP will not be changed
@@ -41,7 +41,6 @@
 
 2. Inside server:
     1. Update all packages using command: `sudo apt update -y`
-    - why we need update??? for secure, stable and compatible, make sure that all things are up to date
     2. Clone the github repo: git clone https://github.com/Reneechang17/Netflix-CloudPipeline
     3. Install the Docker and running the app using a container
         1. Set up Docker on the EC2 instance
@@ -51,7 +50,22 @@
         newgrp docker
         sudo chmod 777 /var/run/docker.sock
         ```
-
+        2. Build and run application using Docker containers
+        ```
+        docker build -t netflix .
+        docker run -d --name netflix -p 8081:80 netflix:latest
+        ```
+        3. You will get error because we need API Key
+    4. Get API Key from TMBD
+        1. search TMDB(The movie Database), then Login or create an account
+        2. Once you Login → Profile → Settings → API
+        3. Create a new Key and accept the terms, fill out the required info and get your TMDB API Key
+    5. At this time, you can recreate your Docker image with your TMDB API key using: `docker build --build-arg TMDB_V3_API_KEY=<your-api-key> -t netflix .`
+        - You might need delete previous one:
+        ```
+        docker stop <containerid>
+        docker rmi -f netflix
+        ```
 
 
 
