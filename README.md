@@ -597,7 +597,7 @@ After doing so, you might need to wait for some time, because this service is a 
   - This application actually using node port service and working on port 30007
 8. Access port 3007: Make sure that port 30007 is open in security group and open *PublicIP:30007* on browser, your application should be running.
 9. Monitoring and add it in Prometheus
-    - add following to your prometheus.yml file using nano, and make sure open port 9100 in security group, and you can using PublicIP:9100 to access Node Exporter and check the metrics for k8s cluster
+    - Navigate to your prometheus.yml file using nano, and make sure open port 9100 in security group, and you can using PublicIP:9100 to access Node Exporter and check the metrics for k8s cluster
 
     ```
       - job_name: 'Netflix'
@@ -606,7 +606,7 @@ After doing so, you might need to wait for some time, because this service is a 
           - targets: ['node1Ip:9100']
     ```
 
-    - and we can also add K8s on your targets section
+    - And we can also add K8s on your targets section
     
     ```
       - job_name: 'K8s'
