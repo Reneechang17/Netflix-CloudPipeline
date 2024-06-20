@@ -135,7 +135,7 @@
 4. Setting up in Tools: Manage Jenkins → Tools → Set up SonarQube Scanner → Apply
     - **So our pipeline is ready to deploy an application now**
 5. Click "New Item" and select Pipeline and paste below pipeline script
-   ```
+   ```groovy
 pipeline {
     agent any
     tools {
