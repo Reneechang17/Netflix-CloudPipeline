@@ -213,7 +213,22 @@ pipeline{
 }
 
 ```
-
+6. Add Docker and Dependency-Check Plugins and tools in Jenkins:
+    1. Install OWasp(dependency-check) and Docker: Jenkins dashboard → Manage Jenkins → Manage Plugins → Search and Install
+        - OWASP Dependency-Check
+        - Docker/ Docker Commons/ Docker Pipeline/ Docker API/ docker-build-step 
+    2. Add DockerHub Credentials:  Manage Jenkins → Manage Credentials → System → Global Credentials → Add Credentials
+        - Kind: Username with password
+        - Scope: Global
+        - Username/ Password: Your DockerHub Username and Password
+        - ID: Set up your ID
+    - Whenever you push an image, you should be able to log in with this credential
+7. Configure Dependency-Check Tool: Manage Jenkins → Tools → Dependency-Check installations & Docker installations → Apply
+    - Name: DP-Check(same as our later process)
+    - Choose "Install from github.com"
+    - Name: Docker
+    - Choose "download from [docker.com](http://docker.com) " with latest version
+8. 
 
 ### Step 4: Adding Prometheus & Grafana for monitoring(EC2 and Jenkins and K8s)
 
