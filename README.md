@@ -32,13 +32,12 @@
 3. Create key pair(for mac using .ppk and for Linux using .pem)
 4. Network: using default VPC and subnet
 5. Firewall(Security Group): allows SSH, HTTP and HTTPs traffic because later we using Jenkins to connect with DockerHub, and DockerHub talks on HTTPs
-   You can see the ports we used in Project Overview section above
 6. Storage: change to **25GB**
 7. Create instance
-
-- Note: Before running the instance, we have to create the **ElasticIP** for later break or etc which make sure that our IP will not be changed
+- Note: Before running the instance, we have to create the **ElasticIP** for later break or etc, which make sure that our IP will not be changed
 8. Network & Security: allocate ElasticIP and make it *associate* with current instance and named it
 9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
+
 
 
 
