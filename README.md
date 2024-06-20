@@ -38,34 +38,39 @@
     - Note: Before running the instance, we have to create the **ElasticIP** for later break or etc, which make sure that our IP will not be changed
     8. Network & Security: allocate ElasticIP and make it *associate* with current instance and named it
     9. Then connect the EC2 instance (make sure that the port 22 in security group is open)
+#### Update and Clone the github repo: 
+   ```
+   sudo apt update -y
+   git clone https://github.com/Reneechang17/Netflix-CloudPipeline
+   ```
 
-2. Inside server:
-    1. Update all packages using command: `sudo apt update -y`
-    2. Clone the github repo: git clone https://github.com/Reneechang17/Netflix-CloudPipeline
-    3. Install the Docker and running the app using a container
-        1. Set up Docker on the EC2 instance
-        ```
-        sudo apt-get install docker.io -y
-        sudo usermod -aG docker [your system user name]
-        newgrp docker
-        sudo chmod 777 /var/run/docker.sock
-        ```
-        2. Build and run application using Docker containers
-        ```
-        docker build -t netflix .
-        docker run -d --name netflix -p 8081:80 netflix:latest
-        ```
-        3. You will get error because we need API Key
-    4. Get API Key from TMBD
-        1. search TMDB(The movie Database), then Login or create an account
-        2. Once you Login → Profile → Settings → API
-        3. Create a new Key and accept the terms, fill out the required info and get your TMDB API Key
-    5. At this time, you can recreate your Docker image with your TMDB API key using: `docker build --build-arg TMDB_V3_API_KEY=<your-api-key> -t netflix .`
-        - You might need delete previous one:
-        ```
-        docker stop <containerid>
-        docker rmi -f netflix
-        ```
+####Install the Docker and running the app using a container
+1. Set up Docker on the EC2 instance
+    ```
+    sudo apt-get install docker.io -y
+    sudo usermod -aG docker [your system user name]
+    newgrp docker
+    sudo chmod 777 /var/run/docker.sock
+    ```
+2. Build and run application using Docker containers
+    ```
+    docker build -t netflix .
+    docker run -d --name netflix -p 8081:80 netflix:latest
+    ```
+3. You will get error because we need API Key
+#### Get API Key from TMBD
+1. search TMDB(The movie Database), then Login or create an account
+2. Once you Login → Profile → Settings → API
+3. Create a new Key and accept the terms, fill out the required info and get your TMDB API Key
+
+#### Recreate your Docker image with your TMDB API key
+- `docker build --build-arg TMDB_V3_API_KEY=<your-api-key> -t netflix .`
+ - You might need delete previous one:
+    ```
+    docker stop <containerid>
+    docker rmi -f netflix
+    ```
+#### Therefore, you can use **PublicIP:8081** port and access the Application on browser
 
 
 
