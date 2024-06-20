@@ -335,8 +335,6 @@ sudo systemctl restart jenkins
     ```
     
 2. Unzip the folder and go inside folder, then create a dictionary named as data and prometheus, move all necessary files inside local bin. 
-    - Also move the console libraries and prometheus.yml file from particular folder
-    
     ```
     tar -xvf prometheus-2.47.1.linux-amd64.tar.gz
     cd prometheus-2.47.1.linux-amd64/
@@ -345,10 +343,38 @@ sudo systemctl restart jenkins
     sudo mv consoles/ console_libraries/ /etc/prometheus/
     sudo mv prometheus.yml /etc/prometheus/prometheus.yml
     ```
-    
-    - After doing this, we can see under /usr/local/bin/, there are prometheus promtool, and under /etc/prometheus/, there are consoles/ console_libraries prometheus.yml
-        - Prometheus is the main application to monitoring, promtool is a query tool to get the data use for monitoring, and the yaml file is where you will set the server which you want to monitor
-        - At the same time, we also need node exporter for Prometheus, which is an agent that gathers system metrics and exposes them in a format which can be ingested by Prometheus
+    - After doing this, you can see under */usr/local/bin/*, there are prometheus promtool, and under */etc/prometheus/*, there are consoles/ console_libraries prometheus.yml
+3. Change the permission for above files
+    - The initial owner is Ubuntu, we need to change it to the Prometheus user we created
+    `sudo chown -R prometheus:prometheus /etc/prometheus/ /data/` 
+4. Create Prometheus systemd unit config: `sudo nano /etc/systemd/system/prometheus.service`
+    - this command will open nano tab, and we need to paste below(service configuration) to the tab:
+```
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+Restart=on-failure
+RestartSec=5s
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/data \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries \
+  --web.listen-address=0.0.0.0:9090 \
+  --web.enable-lifecycle
+
+[Install]
+WantedBy=multi-user.target
+```  
 
 
 
