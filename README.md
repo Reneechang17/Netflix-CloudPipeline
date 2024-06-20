@@ -315,6 +315,58 @@ sudo systemctl restart jenkins
 ```
 
 ### Step 4: Adding Prometheus & Grafana for monitoring(EC2 and Jenkins and K8s)
+#### Launch T2 medium EC2 instance for Monitoring server
+- Before: why we don’t use the same server with T2 large?? Because the server run so slowly so we separate the server.
+1. Operating system: Ubuntu
+    - The minimum requirements for Prometheus Server is: 2 CPU cores, 4 GB of memory and 20 GB of free disk space
+2. Use the same key pair 
+3. Make sure allows HTTPS traffic
+4. Setting storage with 20GB
+5. Create instance
+6. Also need to set up ElasticIP to avoid IP change and *associate* it with monitoring server(How to set you can see Step 1)
+7. Then we run the server and do the initialize update first: `sudo apt update -y`
+
+#### Install Prometheus
+1. Add a user named prometheus and install prometheus from official github repo (It will download the zip folder, we need to unzip it later)
+    
+    ```
+    sudo useradd --system --no-create-home --shell /bin/false prometheus
+    wget https://github.com/prometheus/prometheus/releases/download/v2.47.1/prometheus-2.47.1.linux-amd64.tar.gz
+    ```
+    
+2. Unzip the folder and go inside folder, then create a dictionary named as data and prometheus, move all necessary files inside local bin. 
+    - Also move the console libraries and prometheus.yml file from particular folder
+    
+    ```
+    tar -xvf prometheus-2.47.1.linux-amd64.tar.gz
+    cd prometheus-2.47.1.linux-amd64/
+    sudo mkdir -p /data /etc/prometheus
+    sudo mv prometheus promtool /usr/local/bin/
+    sudo mv consoles/ console_libraries/ /etc/prometheus/
+    sudo mv prometheus.yml /etc/prometheus/prometheus.yml
+    ```
+    
+    - After doing this, we can see under /usr/local/bin/, there are prometheus promtool, and under /etc/prometheus/, there are consoles/ console_libraries prometheus.yml
+        - Prometheus is the main application to monitoring, promtool is a query tool to get the data use for monitoring, and the yaml file is where you will set the server which you want to monitor
+        - At the same time, we also need node exporter for Prometheus, which is an agent that gathers system metrics and exposes them in a format which can be ingested by Prometheus
+
+
+
+#### Install Node Exporter
+
+
+
+
+#### Integrate Node Exporter with Jenkins (modify the prometheus.yml file)
+
+
+
+#### Install Grafana and set it work with Prometheus
+
+
+
+#### Integrate Jenkins in Prometheus and monitor Jenkins using Grafana
+
 
 
 ### Step 5: Email Notification
