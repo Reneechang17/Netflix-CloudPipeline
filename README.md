@@ -20,6 +20,7 @@
 | `Prometheus`       | `:9090` |
 | `Node Exporter`    | `:9100` |
 | `Grafana`          | `:3000` |
+| `K8s deploy`       | `:30007`|
 
 
 ## Project Instruction 
@@ -542,8 +543,75 @@ WantedBy=multi-user.target
     5. And you can access Prometheus targets and see Jenkins using *PublicIP:9090/targets*
 
 2. Monitor Jenkins using Grafana
-
+    - 1. Back to Grafana home page and import a dashboard:
+    - 2. Click "+" sign → import a dashboard → Enter your template ID(search for "node exporter grafana dashboard" on website then you can get it) → Select "Prometheus" as data source → import and you will see a nice dashboard show data about Jenkins
 
 ### Step 5: Email Notification
+1. First, you need a gmail account
+2. Manage your Google Account → Security → Check you have 2fa enable → search "App Passwords" → Enter your google account password → Create an App and set name: Netflix → Create and get your password
+- Using for Jenkins to send the email notifications every time your pipeline has been running and get the reports
+    
+3. Back to Jenkins dashboard →  Manage Jenkins → System → Scroll down to find E-mail Notification → 
+    - SMTP: [smtp.gamil.com](http://smtp.gamil.com) 
+    - Default user-email: put your email
+    - For Advanced, select Use SMTP (fill out username and password which you got from App Passwords) and Use SSL, SMTP port is 465,
+    - Select "Test Configuration" and put your email → Save → And you will receive a test mail 
+4. And find "Extended E-mail Notification", you need to enter same thing → 
+    - For credentials, select the one just created, and select Use SSL 
+    - For Default Content Type: HTML 
+    - For Trigger: select "Always" and "Failure - Any" → Apply and Save
+5. Back to Jenkins → Pipeline Netflix → Configure → Add below to your script → Approve script → Apply
+
+```
+post {
+ always {
+    emailext attachLog: true,
+        subject: "'${currentBuild.result}'",
+        body: "Project: ${env.JOB_NAME}<br/>" +
+            "Build Number: ${env.BUILD_NUMBER}<br/>" +
+            "URL: ${env.BUILD_URL}<br/>",
+        to: '[your email]',                                
+        attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+    }
+}
+```
 
 ### Step 6: AWS EKS → final deployment 
+1. Setting Up EKS : default cluster service role → Remove your personal subnet → default security group → Next and Next → default add-ons → Next and review and create
+2. Create your Nodes: EKS → Clusters → Netflix → Add Node group → and we set 1 instance (node) running → next and create
+3. Before go ahead, you need to install **Helm** on your machine.
+4. Install **ArgoCD**, you can simply follow: https://archive.eksworkshop.com/intermediate/290_argocd/install/
+After doing so, you might need to wait for some time, because this service is a load balancer so it will create a load balancer in our AWS dashboard, once it created, we can get the DNS and log to ArgoCD to connect our repo and deploy it
+5. Install Node Exporter using Helm:
+    1. Add Prometheus community Helm repo: `helm repo add prometheus-community https://prometheus-community.github.io/helm-charts`
+    2. Create a k8s namespace for the node exporter: `kubectl create namespace prometheus-node-exporter`
+    3. Install node exporter using helm: `helm install prometheus-node-exporter prometheus-community/prometheus-node-exporter --namespace prometheus-node-exporter`
+6. Expose ArgoCD-server: https://archive.eksworkshop.com/intermediate/290_argocd/configure/
+    - the DNS will stored in ARGOCD_SERVER, and we can use: `echo $ARGOCD_SERVER` to get the endpoint and open it then follow the instruction to sign in
+7. In your ArgoCD dashboard → Settings → Repositories → Connect repo using HTTPS → paste your github repo URL → Click "Connect" → Back and click "New APP" → set your application and project name → for Sync Policy, choose: Automatic, and paste your github URL on source and Destination, then the path is "Kubernetes", and Namespace is "default" → Save → Click "Sync" → Select "Force" → Click "Synchronize" and "OK" 
+    - name: Set the name for your application
+    - destination: Define the destination where your application should be deployed
+    - project: Specify the project the application belongs to
+    - source: Set the source of your application, including the GitHub repository URL, revision, and the path to the application within the repository
+    - syncPolicy: Configure the sync policy, including automatic syncing, pruning, and self-healing
+  - This application actually using node port service and working on port 30007
+8. Access port 3007: Make sure that port 30007 is open in security group and open *PublicIP:30007* on browser, your application should be running.
+9. Monitoring and add it in Prometheus
+    - add following to your prometheus.yml file using nano, and make sure open port 9100 in security group, and you can using PublicIP:9100 to access Node Exporter and check the metrics for k8s cluster
+
+    ```
+      - job_name: 'Netflix'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['node1Ip:9100']
+    ```
+
+    - and we can also add K8s on your targets section
+    
+    ```
+      - job_name: 'K8s'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['node1Ip:9100']
+
+    ```
