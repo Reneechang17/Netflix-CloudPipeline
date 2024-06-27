@@ -7,7 +7,7 @@
 - EC2, Docker, SonarQube, Trivy, OWasp, Jenkins, Prometheus, Grafana, ArgoCD, Helm, AWS EKS
 
 ### Project Overview
-![Diagram](Replace Link )
+![Diagram](https://github.com/Reneechang17/Netflix-CloudPipeline/blob/main/static/diagram.jpg)
 
 - Service port(you need to set up in your security group)
 
